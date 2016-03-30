@@ -1,0 +1,65 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "plugins": [ "react" ],
+  "env": {
+    "browser": true,
+    "es6": true,
+    mocha: true
+  },
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "classes": true,
+    "defaultParams": true,
+    "destructuring": true,
+    "forOf": true,
+    "generators": true,
+    "modules": true,
+    "restParams": true,
+    "spread": true,
+    "templateStrings": true,
+    "jsx": true
+  },
+  "globals": {
+    "__DEV__": false,
+    "__PROD__": false,
+    "__DEBUG__": false,
+    "__DEBUG_NW__": false
+  },
+  "rules": {
+    "comma-dangle": [ 1, "never" ],
+    "func-names": 0,
+    "key-spacing": 0,
+    "space-before-function-paren": [
+      2,
+      {
+        "anonymous": "always",
+        "named": "never"
+      }
+    ],
+    "no-use-before-define": [
+      0,
+      {
+        "functions": true,
+        "classes": true
+      }
+    ],
+    "no-else-return": 0,
+    "no-multi-spaces": 0,
+    "quotes": [ 2, "single", "avoid-escape" ],
+    "jsx-quotes": [
+      2,
+      "prefer-double"
+    ],
+    "one-var": 0,
+    "indent": [ 2, "tab", { "SwitchCase": 1 } ],
+    "max-len": [2, 220, 2],
+    "react/jsx-indent": [ 2, "tab" ],
+    "react/jsx-indent-props": [ 2, "tab" ],
+    "react/prefer-es6-class": 2,
+    "react/jsx-pascal-case": 2,
+    "react/jsx-no-bind": [2, { "ignoreRefs": true, "allowArrowFunctions": true }],
+    "react/jsx-boolean-value": 0
+  }
+}
