@@ -2,6 +2,11 @@
   "name": "redux-form-validation-helpers",
   "version": "0.0.1",
   "description": "A helper library to make validation and form setup with redux-form easier",
+	"jsnext:main": "./src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leiringer/redux-form-validation-helpers.git"
+  },
   "keywords": [
     "react",
     "redux",
