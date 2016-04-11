@@ -23,10 +23,10 @@ export function getValidators(object, currentPath = '', currentObject = undefine
 		const path = currentPath.length ? `${currentPath}.${keyAttr}` : keyAttr;
 		if (keyObject[key].children) {
 			getValidators(object, path, keyObject[key].children, validators);
-		}	else if (isArray(keyObject[key]) && keyObject[key].length) {
-			getValidators(object, path, keyObject[key][0], validators);
 		} else if (keyObject[key].validations) {
 			validators.push({ fieldName: path, validations: keyObject[key].validations });
+		}	else if (isArray(keyObject[key]) && keyObject[key].length) {
+			getValidators(object, path, keyObject[key][0], validators);
 		}
 	});
 	return validators;
@@ -39,7 +39,7 @@ export function getFieldnames(object, currentPath = '', currentObject = undefine
 		const path = currentPath.length ? `${currentPath}.${keyAttr}` : keyAttr;
 		if (keyObject[key].children) {
 			getFieldnames(object, path, keyObject[key].children, fieldNames);
-		}	else if (isArray(keyObject[key]) && keyObject[key].length) {
+		}	else if (isArray(keyObject[key]) && !keyObject[key].validations && keyObject[key].length) {
 			getFieldnames(object, path, keyObject[key][0], fieldNames);
 		} else {
 			fieldNames.push(path);
@@ -49,9 +49,7 @@ export function getFieldnames(object, currentPath = '', currentObject = undefine
 }
 
 export function getFieldStrings(configurationObject) {
-	const t =  flattenDeep(getFieldnames(configurationObject));
-	console.log(t);
-	return t;
+	return flattenDeep(getFieldnames(configurationObject));
 }
 
 export function getFieldObjects(configurationObject) {
@@ -64,11 +62,14 @@ export function getFieldObjects(configurationObject) {
 
 export function generateAsyncBlurFields(validationConfig) {
 	const validators = getValidators(validationConfig);
-	return filter(validators, {
-		validations: {
-			validateOnBlur: true
+	const asyncBlurFields = [];
+	validators.forEach((validatorCollection) => {
+		const blurFields = filter(validatorCollection.validations, { validator: 'validateOnBlur' });
+		if (blurFields.length) {
+			asyncBlurFields.push(validatorCollection.fieldName);
 		}
-	}).map(validator => validator.fieldName);
+	});
+	return asyncBlurFields;
 }
 
 export function generateReduxFormConfiguration(configurationObject) {
@@ -76,6 +77,40 @@ export function generateReduxFormConfiguration(configurationObject) {
 		asyncValidate: generateAsyncValidation(configurationObject),
 		asyncBlurFields: generateAsyncBlurFields(configurationObject),
 		fields: getFieldStrings(configurationObject)
+	};
+}
+
+export function generateSyncValidation(validationConfig) {
+	return (values) => {
+		const errors = {};
+		const validators = getValidators(validationConfig);
+
+		function addError(field, validatorName, message) {
+			if (!errors[field]) {
+				errors[field] = message;
+			}
+		}
+
+		validators.forEach((validator) => {
+			const validation = validator.validations;
+			if (isObject(validation)) {
+				Object.keys(validation).forEach((validationType) => {
+					if (isFunction(validationStore[validationType])) {
+						const hasError = validationStore[validationType](
+							validator.fieldName,
+							values[validator.fieldName],
+							validation[validationType],
+							values,
+							validation
+						);
+						if (hasError) {
+							addError(validator.fieldName, validationType, validator.errorMessage);
+						}
+					}
+				});
+			}
+		});
+		return errors;
 	};
 }
 
@@ -112,6 +147,8 @@ export function generateAsyncValidation(validationConfig) {
 									resolve();
 								});
 							}));
+						} else if (hasError) {
+							addError(validator.fieldName, validationType, hasError);
 						}
 					}
 				});

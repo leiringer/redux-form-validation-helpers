@@ -10,9 +10,9 @@ import validations from '../validations';
 
 const testConfiguration = {
 	additionalInformation: {
-		validations: {
-			required: true
-		}
+		validations: [
+			{ validator: 'required', options: true, message: 'must be filled' }
+		]
 	},
 	applicationInformation: {
 		children: {
@@ -24,22 +24,26 @@ const testConfiguration = {
 	applicant: {
 		children: {
 			name: {
-				validations: {
-					validateOnBlur: true
-				}
+				validations: [
+					{ validator: 'required', options: true, message: 'must be filled' },
+					{ validator: 'minLength', options: 5, message: 'minimum length of 5' },
+					{ validator: 'validateOnBlur' }
+				]
 			},
 			organisationOrSocialSecurityNumber: {
-				validations: {
-					minLength: 5,
-					validateOnBlur: true
-				}
+				validations: [
+					{ validator: 'minLength', options: 5, message: 'minimum length of 5' },
+					{ validator: 'validateOnBlur' }
+				]
 			},
 			contactInformation: {
 				children: {
 					phoneNumber: {},
 					mobilePhoneNumber: {},
 					email: {
-						email: true
+						validations: [
+							{ validator: 'email', message: 'must be valid e-mail' }
+						]
 					}
 				}
 			},
@@ -183,28 +187,6 @@ const fieldnameResult = [
 	'dates.endTime'
 ];
 
-const validatorsResult = [
-	{
-		fieldName: 'additionalInformation',
-		validations: {
-			required: true
-		}
-	},
-	{
-		fieldName: 'applicant.name',
-		validations: {
-			validateOnBlur: true
-		}
-	},
-	{
-		fieldName: 'applicant.organisationOrSocialSecurityNumber',
-		validations: {
-			minLength: 5,
-			validateOnBlur: true
-		}
-	}
-];
-
 const asyncBlurFieldsResult = [
 	'applicant.name',
 	'applicant.organisationOrSocialSecurityNumber'
@@ -227,33 +209,31 @@ describe('getFieldStrings: should generate the correct strings for a given confi
 
 describe('getValidators: should generate the correct collection of objects', () => {
 	it('should have the same amount of validators', () => {
-		debugger
-		should(getValidators(testConfiguration).length).be.equal(validatorsResult.length);
+		should(getValidators(testConfiguration).length).be.equal(4);
 	});
 	it('should have the same amount of validators for a given field', () => {
-		debugger
-		should(getValidators(testConfiguration)[2].validations.length).be.equal(validatorsResult[2].validations.length);
+		// applicant.name
+		should(getValidators(testConfiguration)[1].validations.length).be.equal(3);
 	});
 	it('should have the exact same field name for a given index', () => {
-		debugger
-		should(getValidators(testConfiguration)[2].fieldName).be.equal(validatorsResult[2].fieldName);
+		should(getValidators(testConfiguration)[1].fieldName).be.equal('applicant.name');
 	});
 });
-//
-// describe('generateAsyncBlurFields: should generate the correct collection of field names', () => {
-// 	it('should have the same amount of field names', () => {
-// 		should(generateAsyncBlurFields(testConfiguration).length).be.equal(asyncBlurFieldsResult.length);
-// 	});
-// 	it('should have the exact same field name for a given index', () => {
-// 		should(generateAsyncBlurFields(testConfiguration)[0]).be.equal(asyncBlurFieldsResult[0]);
-// 		should(generateAsyncBlurFields(testConfiguration)[1]).be.equal(asyncBlurFieldsResult[1]);
-// 	});
-// });
-//
-// describe('addMultipleValidations: should add all available validations to the passed in object', () => {
-// 	it('should contain the same amount of functions', () => {
-// 		const validationStore = {};
-// 		addMultipleValidations(validations, validationStore);
-// 		should(Object.keys(validations).length).be.equal(Object.keys(validationStore).length);
-// 	});
-// });
+
+describe('generateAsyncBlurFields: should generate the correct collection of field names', () => {
+	it('should have the same amount of field names', () => {
+		should(generateAsyncBlurFields(testConfiguration).length).be.equal(asyncBlurFieldsResult.length);
+	});
+	it('should have the exact same field name for a given index', () => {
+		should(generateAsyncBlurFields(testConfiguration)[0]).be.equal(asyncBlurFieldsResult[0]);
+		should(generateAsyncBlurFields(testConfiguration)[1]).be.equal(asyncBlurFieldsResult[1]);
+	});
+});
+
+describe('addMultipleValidations: should add all available validations to the passed in object', () => {
+	it('should contain the same amount of functions', () => {
+		const validationStore = {};
+		addMultipleValidations(validations, validationStore);
+		should(Object.keys(validations).length).be.equal(Object.keys(validationStore).length);
+	});
+});

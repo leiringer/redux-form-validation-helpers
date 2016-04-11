@@ -53,7 +53,7 @@ export function digits(field, value) {
 	return !field || !/^\d+$/.test(value);
 }
 
-export function matchField(field, value, prop, dispatch, allValues) {
+export function matchField(field, value, prop, allValues) {
 	return !value ? false : value !== allValues[prop];
 }
 
