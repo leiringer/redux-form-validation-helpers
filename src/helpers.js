@@ -1,7 +1,7 @@
 import isPromise from 'is-promise';
 import { flattenDeep } from 'lodash/array';
 import { filter } from 'lodash/collection';
-import { isObject, isFunction } from 'lodash/lang';
+import { isObject, isFunction, isArray } from 'lodash/lang';
 import validations from './validations';
 
 const validationStore = {};
@@ -19,18 +19,39 @@ addMultipleValidations(validations, validationStore);
 export function getValidators(object, currentPath = '', currentObject = undefined, validators = []) {
 	const keyObject = currentObject || object;
 	Object.keys(keyObject).forEach(key => {
-		const path = currentPath.length ? `${currentPath}.${key}` : key;
+		const keyAttr = isArray(keyObject[key]) ? `${key}[]` : key;
+		const path = currentPath.length ? `${currentPath}.${keyAttr}` : keyAttr;
 		if (keyObject[key].children) {
 			getValidators(object, path, keyObject[key].children, validators);
-		}	else if (keyObject[key].validations) {
+		}	else if (isArray(keyObject[key]) && keyObject[key].length) {
+			getValidators(object, path, keyObject[key][0], validators);
+		} else if (keyObject[key].validations) {
 			validators.push({ fieldName: path, validations: keyObject[key].validations });
 		}
 	});
 	return validators;
 }
 
+export function getFieldnames(object, currentPath = '', currentObject = undefined, fieldNames = []) {
+	const keyObject = currentObject || object;
+	Object.keys(keyObject).forEach(key => {
+		const keyAttr = isArray(keyObject[key]) ? `${key}[]` : key;
+		const path = currentPath.length ? `${currentPath}.${keyAttr}` : keyAttr;
+		if (keyObject[key].children) {
+			getFieldnames(object, path, keyObject[key].children, fieldNames);
+		}	else if (isArray(keyObject[key]) && keyObject[key].length) {
+			getFieldnames(object, path, keyObject[key][0], fieldNames);
+		} else {
+			fieldNames.push(path);
+		}
+	});
+	return fieldNames;
+}
+
 export function getFieldStrings(configurationObject) {
-	return flattenDeep(getFieldnames(configurationObject));
+	const t =  flattenDeep(getFieldnames(configurationObject));
+	console.log(t);
+	return t;
 }
 
 export function getFieldObjects(configurationObject) {
@@ -105,35 +126,4 @@ export function generateAsyncValidation(validationConfig) {
 			}
 		});
 	};
-}
-
-function getFieldnames(obj) {
-	return Object.keys(obj).map(key => {
-		if (obj[key].children) {
-			return getChildFieldnames(key, obj);
-		}
-		return key;
-	});
-}
-
-function getChildFieldnames(parent, obj) {
-	const children = [];
-	Object.keys(obj[parent].children).forEach(child => {
-		if (obj[parent].children[child].children) {
-			getFieldnames(obj[parent].children[child].children).forEach(childKey => {
-				if (obj[parent].children[child].children[childKey] instanceof Array) {
-					children.push(`${parent}.${child}.${childKey}[]`);
-				} else {
-					children.push(`${parent}.${child}.${childKey}`);
-				}
-			});
-		} else {
-			if (obj[parent].children[child] instanceof Array) {
-				children.push(`${parent}.${child}[]`);
-			} else {
-				children.push(`${parent}.${child}`);
-			}
-		}
-	});
-	return children;
 }
