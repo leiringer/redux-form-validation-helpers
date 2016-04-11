@@ -6,7 +6,8 @@ import  {
 	getFieldObjects,
 	generateAsyncBlurFields,
 	generateReduxFormConfiguration,
-	generateAsyncValidation
+	generateAsyncValidation,
+	generateSyncValidation
 } from './helpers.js';
 
 export {
@@ -17,5 +18,6 @@ export {
 	getFieldObjects,
 	generateAsyncBlurFields,
 	generateReduxFormConfiguration,
-	generateAsyncValidation
+	generateAsyncValidation,
+	generateSyncValidation
 };

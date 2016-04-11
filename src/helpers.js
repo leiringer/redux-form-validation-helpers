@@ -2,6 +2,7 @@ import isPromise from 'is-promise';
 import { flattenDeep } from 'lodash/array';
 import { filter } from 'lodash/collection';
 import { isObject, isFunction, isArray } from 'lodash/lang';
+import { get } from 'lodash/object';
 import validations from './validations';
 
 const validationStore = {};
@@ -81,34 +82,42 @@ export function generateReduxFormConfiguration(configurationObject) {
 }
 
 export function generateSyncValidation(validationConfig) {
-	return (values) => {
+	return function (values) {
 		const errors = {};
 		const validators = getValidators(validationConfig);
 
 		function addError(field, validatorName, message) {
-			if (!errors[field]) {
-				errors[field] = message;
-			}
+			const fieldComponents = field.split('.');
+			let currentNode = errors;
+			fieldComponents.forEach((fieldComponent, index) => {
+				if (!currentNode[fieldComponent]) {
+					if (index < fieldComponents.length - 1) {
+						currentNode = currentNode[fieldComponent] = {};
+					}	else {
+						currentNode[fieldComponent] = message;
+					}
+				}	else {
+					currentNode = currentNode[fieldComponent];
+				}
+			});
 		}
 
 		validators.forEach((validator) => {
-			const validation = validator.validations;
-			if (isObject(validation)) {
-				Object.keys(validation).forEach((validationType) => {
-					if (isFunction(validationStore[validationType])) {
-						const hasError = validationStore[validationType](
-							validator.fieldName,
-							values[validator.fieldName],
-							validation[validationType],
-							values,
-							validation
-						);
-						if (hasError) {
-							addError(validator.fieldName, validationType, validator.errorMessage);
-						}
+			const validationObject = validator.validations;
+			validationObject.forEach(validation => {
+				const validationType = validation.validator;
+				if (isFunction(validationStore[validationType])) {
+					const hasError = validationStore[validationType](
+						validator.fieldName,
+						get(values, validator.fieldName),
+						validation.option,
+						values
+					);
+					if (hasError) {
+						addError(validator.fieldName, validationType, validation.message);
 					}
-				});
-			}
+				}
+			});
 		});
 		return errors;
 	};
