@@ -57,6 +57,26 @@ export function matchField(field, value, prop, allValues) {
 	return !value ? false : value !== allValues[prop];
 }
 
+export function shouldMatchCondition(field, value, prop, allValues, condition) {
+	return !prop ? false : allValues[prop]  === condition && !value;
+}
+
+export function shouldContainLowerCase(field, value, prop) {
+	return prop && value ? !/^(?=.*[a-z])/.test(value) : false;
+}
+
+export function shouldContainUpperCase(field, value, prop) {
+	return prop && value ? !/(?=.*[A-Z])/.test(value) : false;
+}
+
+export function shouldContainDigit(field, value, prop) {
+	return prop && value ? !/(?=.*[0-9])/.test(value) : false;
+}
+
+export function shouldContainSpecialCharacter(field, value, prop) {
+	return prop && value ? !/(?=.*[!_£@#\$%\^&\*])/.test(value) : false;
+}
+
 export default {
 	required,
 	minLength,
@@ -70,5 +90,10 @@ export default {
 	url,
 	promise,
 	digits,
-	matchField
+	matchField,
+	shouldMatchCondition,
+	shouldContainLowerCase,
+	shouldContainUpperCase,
+	shouldContainDigit,
+	shouldContainSpecialCharacter
 };
