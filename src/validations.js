@@ -18,6 +18,10 @@ export function email(field, value, prop) {
 		false;
 }
 
+export function phone(field, value, prop) {
+	return prop && value ? !/^(?:\s*\+)?[\d\s\.\-]{5,16}$/.test(value) : false;
+}
+
 export function min(field, value, prop) {
 	return prop && value ? !isFinite(value) || parseFloat(value) < prop : false;
 }
@@ -57,8 +61,20 @@ export function matchField(field, value, prop, allValues) {
 	return !value ? false : value !== allValues[prop];
 }
 
-export function shouldMatchCondition(field, value, prop, allValues, condition) {
-	return !prop ? false : allValues[prop]  === condition && !value;
+export function patternIfMatchCondition(field, value, prop, allValues) {
+	if (allValues[prop.field] === prop.condition) {
+		return !value ? true : !prop.pattern.test(value)
+	} else {
+		return false;
+	}
+}
+
+export function arrayGreaterThan(field, value, prop, allValues) {
+	return allValues[prop.field].length >= prop.condition ? false : true;
+}
+
+export function requiredIfMatchCondition(field, value, prop, allValues) {
+	return allValues[prop.field] === prop.condition && !value ? true : false;
 }
 
 export function shouldContainLowerCase(field, value, prop) {
@@ -82,6 +98,7 @@ export default {
 	minLength,
 	maxLength,
 	email,
+	phone,
 	min,
 	max,
 	pattern,
@@ -91,7 +108,9 @@ export default {
 	promise,
 	digits,
 	matchField,
-	shouldMatchCondition,
+	patternIfMatchCondition,
+	arrayGreaterThan,
+	requiredIfMatchCondition,
 	shouldContainLowerCase,
 	shouldContainUpperCase,
 	shouldContainDigit,
