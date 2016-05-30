@@ -35,7 +35,7 @@ export function pattern(field, value, prop) {
 }
 
 export function equalTo(field, value, prop) {
-	return !value ? false : prop !== value;
+	return value === undefined || value === null ? false : prop !== value;
 }
 
 export function oneOf(field, value, prop) {
