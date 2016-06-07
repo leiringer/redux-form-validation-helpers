@@ -1,7 +1,7 @@
 import validUrl from 'valid-url';
 
 export function required(field, value, prop) {
-	return prop ? !value : false;
+	return prop ? value === undefined || value === null || value === '' : false;
 }
 
 export function minLength(field, value, prop) {
