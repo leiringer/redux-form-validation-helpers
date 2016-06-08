@@ -1,7 +1,7 @@
 import validUrl from 'valid-url';
 
 export function required(field, value, prop) {
-	return prop ? value === undefined || value === null || value === '' : false;
+	return prop ? isUndefinedOrEmpty(value) : false;
 }
 
 export function minLength(field, value, prop) {
@@ -54,7 +54,7 @@ export function promise(field, value, prop) {
 }
 
 export function digits(field, value) {
-	return !field || !/^\d+$/.test(value);
+	return isUndefinedOrEmpty(value) ? false : !field || !/^\d+$/.test(value);
 }
 
 export function matchField(field, value, prop, allValues) {
@@ -91,6 +91,10 @@ export function shouldContainDigit(field, value, prop) {
 
 export function shouldContainSpecialCharacter(field, value, prop) {
 	return prop && value ? !/(?=.*[!_£@#\$%\^&\*])/.test(value) : false;
+}
+
+function isUndefinedOrEmpty(value) {
+	return value === undefined || value === null || value === '';
 }
 
 export default {
