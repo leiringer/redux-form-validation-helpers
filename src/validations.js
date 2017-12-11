@@ -19,7 +19,7 @@ export function email(field, value, prop) {
 }
 
 export function phone(field, value, prop) {
-	return prop && value ? !/^(?:\s*\+)?[\d\s\.\-]{5,16}$/.test(value) : false;
+	return prop && value ? !/^(?:\s*\+)?[\d\s\-]{5,16}$/.test(value) : false;
 }
 
 export function min(field, value, prop) {
